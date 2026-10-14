@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Period Product Calendar</title>
+<style>
+:root{--pink:#e96f9f;--pink-dark:#b93e73;--pink-soft:#fff0f5;--pink-pale:#fff8fb;--rose:#f7c6d8;--ink:#392b34;--muted:#806d77;--green:#467b62;--line:#f0dce5;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:#fff8fb;color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--pink);color:#fff;font-weight:700;transition:.15s}button:hover{filter:brightness(.96);transform:translateY(-1px)}button.secondary{background:#fff;color:var(--pink-dark);border:1px solid var(--line)}button.ghost{background:transparent;color:var(--pink-dark);padding:6px 8px}
+header{background:linear-gradient(120deg,#f8bfd4,#ffeaf2);padding:30px max(20px,calc((100vw - 1200px)/2)) 26px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;display:grid;place-items:center;background:#fff;border-radius:15px;font-size:25px;box-shadow:0 5px 16px #b93e7318}
+h1{font-size:clamp(25px,3vw,35px);line-height:1.1;margin:0;letter-spacing:-.8px}header p{color:#765261;margin:8px 0 0;max-width:720px}
+main{max-width:1200px;margin:24px auto;padding:0 20px 50px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);gap:20px;align-items:start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 24px #9e52690a;margin-bottom:18px;min-width:0}
+.panel h2{font-size:18px;margin:0 0 14px;letter-spacing:-.3px}.panel h3{font-size:14px;margin:0 0 8px}.muted,.hint{color:var(--muted);font-size:13px}.hint{margin:6px 0 0}
+.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.month-title{font-size:20px;font-weight:800}.month-nav{display:flex;gap:6px}.month-nav button{padding:8px 12px}
+.weekdays,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.weekdays div{text-align:center;color:var(--muted);font-size:11px;font-weight:800;padding:7px 0;text-transform:uppercase;letter-spacing:.5px}
+.day{position:relative;min-height:78px;border:1px solid #f4e5eb;border-radius:12px;background:#fff;padding:8px 5px;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:flex-start;font-weight:500;transform:none}
+.day:hover{border-color:var(--pink);transform:none}.day.outside{opacity:.36;background:#fffafd}.day.selected{outline:2px solid var(--pink);outline-offset:1px}.day.today .num{background:var(--pink);color:#fff}.num{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;font-size:12px;font-weight:800}
+.dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}.dot{font-size:9px;border-radius:7px;padding:2px 4px;background:var(--pink-soft);color:var(--pink-dark);white-space:nowrap}.dot.period{background:#f5b6cd;color:#7b2149}.dot.follicular{background:#e7f3ec;color:#376b51}.dot.ovulation{background:#fff0bd;color:#84651a}.dot.luteal{background:#eae6fb;color:#6451a1}
+.legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.legend span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}.swatch{width:9px;height:9px;border-radius:3px;display:inline-block}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}label{font-size:12px;font-weight:800;color:#6b4c5a}input,select,textarea{width:100%;border:1px solid #ead7e0;background:#fffafd;border-radius:10px;padding:10px 11px;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--pink);box-shadow:0 0 0 3px #e96f9f20}input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--pink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.pill-row{display:flex;gap:7px;flex-wrap:wrap}.pill{display:flex;gap:7px;align-items:center;border:1px solid var(--line);padding:9px 11px;border-radius:12px;background:#fffafd;font-size:13px}
+.callout{padding:13px 14px;background:var(--pink-soft);border-radius:13px;color:#76405a;font-size:13px;margin-top:12px}.callout.green{background:#eef7f1;color:#315e49}.callout.amber{background:#fff6df;color:#755c21}.product-card{border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px}.product-card strong{display:block;margin-bottom:4px}.timer{font-size:28px;line-height:1.2;font-weight:850;letter-spacing:-1px;color:var(--pink-dark);margin:8px 0}.timer.warning{color:#b66b12}.timer.danger{color:#ba3151}.history{display:flex;flex-direction:column;gap:8px;margin-top:12px}.history-item{display:flex;justify-content:space-between;gap:10px;padding:10px 11px;background:#fff8fb;border-radius:10px;font-size:12px}.history-item strong{font-size:13px}.history-item .right{text-align:right}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{padding:12px;border-radius:13px;background:#fff6fa;border:1px solid #f5e2eb}.stat .value{font-size:23px;font-weight:850;color:var(--pink-dark)}.stat .label{font-size:11px;color:var(--muted);font-weight:700}.survey-q{margin:12px 0}.survey-q .options{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}.options label{font-weight:600;border:1px solid var(--line);padding:8px 10px;border-radius:10px;display:flex;align-items:center;gap:6px;background:#fffafd}.recommendation{padding:14px;border:1px solid #f0d4e0;border-radius:14px;background:linear-gradient(135deg,#fff5f9,#fff)}.recommendation h3{font-size:16px}.small{font-size:12px}.empty{color:var(--muted);font-size:13px;padding:12px 0}
+footer{max-width:1200px;margin:0 auto;padding:0 20px 28px;color:var(--muted);font-size:12px}
+@media(max-width:850px){main{grid-template-columns:1fr}.day{min-height:66px}.panel{padding:16px}}
+@media(max-width:480px){main{padding:0 10px 35px;margin-top:12px}header{padding:23px 15px}.day{min-height:54px;padding:4px 1px}.num{width:22px;height:22px}.dot{font-size:8px;padding:1px 3px}.field-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{border-radius:16px}.stats{gap:5px}.stat{padding:9px}.stat .value{font-size:20px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo" aria-hidden="true">🌸</div><div><h1>Period Product Calendar</h1><p>A gentle place to track your cycle, care for yourself, and make product choices that feel right for you.</p></div></div>
+</header>
+<main>
+<section>
+  <div class="panel">
+    <div class="calendar-head"><div><div class="muted">YOUR CYCLE</div><div class="month-title" id="monthTitle">Month Year</div></div><div class="month-nav"><button class="secondary" id="prevMonth" aria-label="Previous month">←</button><button class="secondary" id="todayBtn">Today</button><button class="secondary" id="nextMonth" aria-label="Next month">→</button></div></div>
+    <div class="weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+    <div class="days" id="calendarDays"></div>
+    <div class="legend">
+      <span><i class="swatch" style="background:#f5b6cd"></i> Menstrual</span><span><i class="swatch" style="background:#e7f3ec"></i> Follicular</span><span><i class="swatch" style="background:#fff0bd"></i> Ovulation</span><span><i class="swatch" style="background:#eae6fb"></i> Luteal</span>
+    </div>
+    <p class="hint">Select a day to log period dates, flow, products, or your daily check-in. Phase and next-period dates are estimates, not guarantees.</p>
+  </div>
+
+  <div class="panel">
+    <h2>🗓️ Log your day <span id="selectedDateLabel" class="muted"></span></h2>
+    <div class="field-grid">
+      <div class="field"><label for="periodStart">Period start date</label><input id="periodStart" type="date"></div>
+      <div class="field"><label for="periodEnd">Period end date</label><input id="periodEnd" type="date"></div>
+      <div class="field"><label for="flow">Flow for selected day</label><select id="flow"><option value="">Not logged</option><option>Light</option><option>Medium</option><option>Heavy</option></select></div>
+      <div class="field"><label for="cycleLength">Usual cycle length (days)</label><input id="cycleLength" type="number" min="15" max="60" value="28"></div>
+      <div class="field"><label for="periodLength">Usual period length (days)</label><input id="periodLength" type="number" min="1" max="15" value="5"></div>
+      <div class="field"><label for="feeling">End-of-day check-in</label><select id="feeling"><option value="">How are you feeling?</option><option value="good">😊 Good</option><option value="neutral">😐 Neutral</option><option value="bad">🫶 Not great</option></select></div>
+    </div>
+    <div class="actions"><button id="saveDay">Save day</button><button class="secondary" id="clearDay">Clear selected day</button></div>
+    <div id="checkinMessage" class="callout" style="display:none"></div>
+    <div id="phaseInfo" class="callout"></div>
+  </div>
+
+  <div class="panel">
+    <h2>🌱 Product use & sustainability</h2>
+    <div class="stats">
+      <div class="stat"><div class="value" id="dayTotal">0</div><div class="label">Changes today</div></div>
+      <div class="stat"><div class="value" id="cycleTotal">0</div><div class="label">Changes this cycle</div></div>
+      <div class="stat"><div class="value" id="cupTotal">0</div><div class="label">Cup uses logged</div></div>
+    </div>
+    <div id="sustainabilityMessage" class="callout green">Every small choice counts. Reusable products may reduce disposable waste if they work for your body and routine.</div>
+    <p class="hint">Counts reflect logged changes/refreshes, not a precise environmental footprint. A menstrual cup is usually rinsed and reused during a cycle, not counted as a new product each time.</p>
+    <div class="actions"><button class="secondary" id="exportBtn">Export my log (CSV)</button><button class="ghost" id="resetBtn">Reset all data</button></div>
+  </div>
+</section>
+
+<aside>
+  <div class="panel">
+    <h2>💗 Quick product guide</h2>
+    <p class="muted">Optional survey — use it for ideas, not rules. Choose any product you feel comfortable with.</p>
+    <div class="survey-q"><label>How active will you be today?</label><div class="options"><label><input type="radio" name="activity" value="active"> Very active</label><label><input type="radio" name="activity" value="calm"> Not very active</label></div></div>
+    <div class="survey-q"><label>What comfort matters most?</label><div class="options"><label><input type="radio" name="comfort" value="unnoticed"> Want to barely feel it</label><label><input type="radio" name="comfort" value="either"> Either is fine</label></div></div>
+    <div class="survey-q"><label>How much do you want to prioritize sustainability?</label><div class="options"><label><input type="radio" name="sustain" value="high"> A lot</label><label><input type="radio" name="sustain" value="some"> Somewhat</label><label><input type="radio" name="sustain" value="low"> Not a priority today</label></div></div>
+    <div class="survey-q"><label>Where are you in your cycle?</label><select id="cycleDay"><option value="early">Early / heavier days</option><option value="middle">Middle days</option><option value="late">Late / lighter days</option></select></div>
+    <button id="recommendBtn">Suggest a product</button>
+    <div id="recommendation" class="recommendation" style="margin-top:12px"><h3>Your comfort comes first</h3><p class="muted">Answer the survey and tap “Suggest a product” for a personalized starting point.</p></div>
+    <div class="callout green">🌿 Sustainable steps, at your pace: try a reusable cup if it suits you, choose reusable period underwear or washable pads if available, and use the absorbency you actually need. Never keep a product in longer than its safe maximum just to reduce waste.</div>
+  </div>
+
+  <div class="panel">
+    <h2>⏱️ Product timer & change log</h2>
+    <div class="field-grid">
+      <div class="field"><label for="productType">Product</label><select id="productType"><option value="Tampon">Tampon</option><option value="Pad">Pad</option><option value="Menstrual cup">Menstrual cup</option><option value="Panty liner">Panty liner</option></select></div>
+      <div class="field"><label for="productFlow">Flow</label><select id="productFlow"><option>Heavy</option><option selected>Medium</option><option>Light</option></select></div>
+      <div class="field"><label for="changeTime">Time inserted / changed</label><input id="changeTime" type="datetime-local"></div>
+      <div class="field"><label for="changeNote">Optional note</label><input id="changeNote" type="text" placeholder="e.g. changed before class"></div>
+    </div>
+    <div class="actions"><button id="startTimer">Log product / start timer</button><button class="secondary" id="refreshProduct">Log change / refresh</button></div>
+    <div id="timerPanel" class="product-card"><strong>No active timer yet</strong><p class="muted">Log a product to see a suggested change window and safety reminder.</p></div>
+    <h3 style="margin-top:18px">Recent changes</h3>
+    <div id="history" class="history"><div class="empty">Your logged product changes will appear here.</div></div>
+  </div>
+</aside>
+</main>
+<footer>Privacy note: this page saves your entries in this browser using local storage. It does not send them to a server. If you share this device, consider clearing your data. Cycle predictions can be inaccurate, especially with irregular cycles. This is a tracking aid, not medical advice.</footer>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const todayISO = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const localDateTime = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+const parseDate = s => s ? new Date(s+'T12:00:00') : null;
+const dateISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const addDays = (date,n) => { const d=new Date(date); d.setDate(d.getDate()+n); return d; };
+const dayDiff = (a,b) => Math.round((parseDate(b)-parseDate(a))/86400000);
+const safeNum = (v, fallback, min, max) => Math.max(min,Math.min(max,Number(v)||fallback));
+let data = {days:{}, changes:[], settings:{cycleLength:28,periodLength:5,lastStart:todayISO(),lastEnd:''}};
+try { const saved=localStorage.getItem('periodProductCalendarV1'); if(saved) data=Object.assign(data,JSON.parse(saved)); } catch(e){}
+let selected = todayISO(), viewDate = parseDate(selected), activeChangeId = null, timerInterval = null;
+function persist(){ try{localStorage.setItem('periodProductCalendarV1',JSON.stringify(data));}catch(e){} }
+function ensureDay(s){ if(!data.days[s]) data.days[s]={flow:'',feeling:'',period:false}; return data.days[s]; }
+function phaseFor(s){
+ const start=data.settings.lastStart||selected, cycle=safeNum(data.settings.cycleLength,28,15,60), plen=safeNum(data.settings.periodLength,5,1,15);
+ const offset=dayDiff(start,s); if(offset<0) return {name:'Before tracked cycle',key:'',day:0};
+ const day=offset%cycle+1, ov=Math.max(1,cycle-14);
+ if(day<=plen) return {name:'Menstrual phase',key:'period',day};
+ if(day<ov) return {name:'Follicular phase',key:'follicular',day};
+ if(day===ov) return {name:'Estimated ovulation',key:'ovulation',day};
+ return {name:'Luteal phase',key:'luteal',day};
+}
+function dateRange(s,start,end){return !!(start&&end&&s>=start&&s<=end);}
+function renderCalendar(){
+ const first=new Date(viewDate.getFullYear(),viewDate.getMonth(),1), start=new Date(first); start.setDate(1-first.getDay());
+ $('monthTitle').textContent=viewDate.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+ const wrap=$('calendarDays'); wrap.innerHTML='';
+ for(let i=0;i<42;i++){
+  const d=addDays(start,i), iso=dateISO(d), rec=data.days[iso]||{}, b=document.createElement('button');
+  b.className='day'+(d.getMonth()!==viewDate.getMonth()?' outside':'')+(iso===selected?' selected':'')+(iso===todayISO()?' today':'');
+  const num=document.createElement('span');num.className='num';num.textContent=d.getDate();b.appendChild(num);
+  const dots=document.createElement('div');dots.className='dots';
+  let phase=phaseFor(iso), pstart=data.settings.lastStart, pend=data.settings.lastEnd;
+  const isPeriod=rec.period || dateRange(iso,pstart,pend) || (phase.day>0&&phase.day<=safeNum(data.settings.periodLength,5,1,15));
+  if(isPeriod){const x=document.createElement('span');x.className='dot period';x.textContent='Period';dots.appendChild(x);}
+  else if(phase.key){const x=document.createElement('span');x.className='dot '+phase.key;x.textContent=phase.key==='ovulation'?'Ovulation':phase.key==='follicular'?'Follicular':'Luteal';dots.appendChild(x);}
+  if(rec.flow){const x=document.createElement('span');x.className='dot';x.textContent=rec.flow+' flow';dots.appendChild(x);}
+  if(rec.feeling){const x=document.createElement('span');x.className='dot';x.textContent=({good:'😊',neutral:'😐',bad:'🫶'})[rec.feeling];dots.appendChild(x);}
+  b.appendChild(dots);b.addEventListener('click',()=>selectDay(iso));wrap.appendChild(b);
+ }
+}
+function selectDay(s){
+ selected=s; viewDate=parseDate(s); const rec=data.days[s]||{};
+ $('selectedDateLabel').textContent='— '+parseDate(s).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+ $('flow').value=rec.flow||''; $('feeling').value=rec.feeling||'';
+ $('periodStart').value=data.settings.lastStart||''; $('periodEnd').value=data.settings.lastEnd||'';
+ $('cycleLength').value=data.settings.cycleLength; $('periodLength').value=data.settings.periodLength;
+ $('checkinMessage').style.display=rec.feeling?'block':'none';
+ if(rec.feeling) $('checkinMessage').textContent=({good:'You deserve to feel proud of how you cared for yourself today. Keep listening to your body. 💗',neutral:'Neutral days count, too. Take things one step at a time and give yourself room to rest. 🌷',bad:'I’m sorry today feels hard. You deserve care and kindness—rest, hydrate, and reach out to someone you trust if you need support. 🫶'})[rec.feeling];
+ const ph=phaseFor(s); const next=addDays(parseDate(data.settings.lastStart||s),safeNum(data.settings.cycleLength,28,15,60));
+ $('phaseInfo').innerHTML=`<strong>${ph.name}</strong> · Cycle day ${ph.day||'—'}<br><span class="small">Estimated next period: ${next.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}. Cycle phases vary; this estimate is based on your last start date and usual cycle length.</span>`;
+ renderCalendar(); renderStats();
+}
+function saveDay(){
+ const start=$('periodStart').value, end=$('periodEnd').value;
+ if(start&&end&&end<start){alert('The period end date must be on or after the start date.');return;}
+ data.settings.lastStart=start||data.settings.lastStart; data.settings.lastEnd=end;
+ data.settings.cycleLength=safeNum($('cycleLength').value,28,15,60);data.settings.periodLength=safeNum($('periodLength').value,5,1,15);
+ const rec=ensureDay(selected);rec.flow=$('flow').value;rec.feeling=$('feeling').value;
+ if(start&&end&&dateRange(selected,start,end)) rec.period=true;
+ persist(); selectDay(selected);
+}
+function clearDay(){delete data.days[selected];persist();selectDay(selected);}
+function limits(type,flow){
+ if(type==='Tampon') return flow==='Heavy'?{min:2,max:3,absolute:8,unit:'hours'}:{min:4,max:6,absolute:8,unit:'hours'};
+ if(type==='Pad') return flow==='Heavy'?{min:2,max:4,absolute:8,unit:'hours'}:flow==='Light'?{min:6,max:8,absolute:12,unit:'hours'}:{min:4,max:6,absolute:8,unit:'hours'};
+ if(type==='Menstrual cup') return flow==='Heavy'?{min:3,max:6,absolute:12,unit:'hours'}:{min:6,max:12,absolute:12,unit:'hours'};
+ return flow==='Heavy'?{min:2,max:4,absolute:8,unit:'hours'}:flow==='Light'?{min:6,max:8,absolute:12,unit:'hours'}:{min:4,max:6,absolute:8,unit:'hours'};
+}
+function productAdvice(type,flow){
+ if(type==='Tampon')return 'Follow package directions and change every 4–8 hours; never leave a tampon in for more than 8 hours. Use the lowest absorbency that manages your flow.';
+ if(type==='Menstrual cup')return 'Follow your cup’s instructions for emptying, cleaning, and wear time. Do not exceed 12 hours; some cups require more frequent emptying.';
+ if(type==='Pad')return 'Change when wet, uncomfortable, or saturated, and regularly through the day. These times are planning prompts, not a reason to wait if it needs changing.';
+ return 'Change when damp or uncomfortable and follow the product’s directions.';
+}
+function logProduct(isRefresh){
+ const type=$('productType').value, flow=$('productFlow').value, raw=$('changeTime').value||localDateTime();
+ const when=new Date(raw); if(Number.isNaN(when.getTime())){alert('Please choose a valid time.');return;}
+ const lim=limits(type,flow), id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ const entry={id,date:selected,type,flow,time:when.toISOString(),note:$('changeNote').value||'',kind:isRefresh?'Change / refresh':'Started use',minHours:lim.min,maxHours:lim.max,absoluteHours:lim.absolute};
+ data.changes.unshift(entry);activeChangeId=id;persist();$('changeTime').value=localDateTime();$('changeNote').value='';renderHistory();renderStats();renderTimer();
+}
+function latestActive(){return activeChangeId?data.changes.find(x=>x.id===activeChangeId):data.changes[0];}
+function renderTimer(){
+ const e=latestActive(), box=$('timerPanel');if(!e){box.innerHTML='<strong>No active timer yet</strong><p class="muted">Log a product to see a suggested change window and safety reminder.</p>';return;}
+ const elapsed=(Date.now()-new Date(e.time).getTime())/3600000, remain=e.absoluteHours-elapsed, recommended=e.maxHours-elapsed;
+ const klass=elapsed>=e.absoluteHours?'danger':elapsed>=e.maxHours?'warning':'';
+ let status=elapsed>=e.absoluteHours?'Maximum wear time reached — change/remove now.':elapsed>=e.maxHours?'Suggested change window has passed. Please change/empty it now.':elapsed>=e.minHours?'It may be time to change or empty it; check comfort and flow.':`Suggested change window begins in ${formatDuration(Math.max(0,e.minHours-elapsed))}.`;
+ box.innerHTML=`<strong>${e.type} · ${e.flow.toLowerCase()} flow</strong><div class="timer ${klass}" id="timerClock">${remain>=0?'Max in '+formatDuration(remain):'Over max by '+formatDuration(-remain)}</div><div class="small">${status}</div><p class="muted small">Logged ${new Date(e.time).toLocaleString()} · Suggested window: ${e.minHours}–${e.maxHours} hours; safety maximum used here: ${e.absoluteHours} hours.</p><div class="callout ${elapsed>=e.maxHours?'amber':''}">${productAdvice(e.type,e.flow)}</div>`;
+}
+function formatDuration(hours){const m=Math.max(0,Math.round(hours*60));return `${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`;}
+function renderHistory(){
+ const h=$('history');h.innerHTML='';if(!data.changes.length){h.innerHTML='<div class="empty">Your logged product changes will appear here.</div>';return;}
+ data.changes.slice(0,12).forEach(e=>{const d=document.createElement('div');d.className='history-item';const left=document.createElement('div');left.innerHTML=`<strong>${escapeHTML(e.type)} · ${escapeHTML(e.flow)}</strong><br><span class="muted">${escapeHTML(e.kind)}${e.note?' — '+escapeHTML(e.note):''}</span>`;const right=document.createElement('div');right.className='right';right.textContent=new Date(e.time).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});d.append(left,right);h.appendChild(d);});
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderStats(){
+ const todayChanges=data.changes.filter(e=>e.date===selected);
+ const start=data.settings.lastStart||selected, end=addDays(parseDate(start),safeNum(data.settings.cycleLength,28,15,60)-1), endISO=dateISO(end);
+ const cycleChanges=data.changes.filter(e=>e.date>=start&&e.date<=endISO);
+ $('dayTotal').textContent=todayChanges.length;$('cycleTotal').textContent=cycleChanges.length;$('cupTotal').textContent=cycleChanges.filter(e=>e.type==='Menstrual cup').length;
+ const disposables=cycleChanges.filter(e=>e.type==='Tampon'||e.type==='Pad'||e.type==='Panty liner').length;
+ $('sustainabilityMessage').textContent=disposables>0?`You’ve logged ${disposables} disposable product changes this cycle so far. If it feels right for you, consider reusable options or products that fit your flow well. Comfort, access, and safety come first.`:'You haven’t logged any disposable product changes this cycle yet. Reusable options may reduce waste if they suit your body, access, and routine.';
+}
+function recommend(){
+ const activity=document.querySelector('input[name=activity]:checked')?.value, comfort=document.querySelector('input[name=comfort]:checked')?.value, sustain=document.querySelector('input[name=sustain]:checked')?.value, day=$('cycleDay').value;
+ let scores={Tampon:0,Pad:0,'Menstrual cup':0,'Panty liner':0}, why=[];
+ if(activity==='active'){scores.Tampon+=2;scores['Menstrual cup']+=2;why.push('For higher activity, a tampon or cup can feel secure during movement.');}
+ if(activity==='calm'){scores.Pad+=2;scores['Panty liner']+=1;why.push('For a less active day, a pad may be a comfortable, simple option.');}
+ if(comfort==='unnoticed'){scores.Tampon+=2;scores['Menstrual cup']+=1;why.push('If you prefer not to feel an external product, an internal option may suit you if you are comfortable using one.');}
+ if(comfort==='either'){scores.Pad+=1;why.push('You have flexibility to choose based on flow, convenience, and comfort.');}
+ if(sustain==='high'){scores['Menstrual cup']+=5;why.push('A reusable menstrual cup can reduce single-use product waste when used and cared for according to instructions.');}
+ if(sustain==='some'){scores['Menstrual cup']+=2;scores.Pad+=1;why.push('Reusable options or washable pads may help reduce waste.');}
+ if(sustain==='low'){scores.Pad+=1;why.push('Choose what is most convenient and comfortable today.');}
+ if(day==='early'){scores.Tampon+=2;scores['Menstrual cup']+=2;why.push('Early days may be heavier: choose absorbency/capacity that safely manages your flow.');}
+ if(day==='middle'){scores.Pad+=1;scores.Tampon+=1;}
+ if(day==='late'){scores.Pad+=2;scores['Panty liner']+=3;why.push('As flow fades, a light pad or panty liner may be enough. A liner may not be suitable if flow is still moderate or heavy.');}
+ const best=Object.keys(scores).sort((a,b)=>scores[b]-scores[a])[0];
+ const descriptions={'Tampon':'Use the lowest absorbency that manages your flow and change within 8 hours maximum.','Pad':'Change when damp, uncomfortable, or saturated; timing depends on flow and product directions.','Menstrual cup':'Follow the cup’s care instructions and never exceed its stated wear limit (commonly up to 12 hours).','Panty liner':'Best for spotting or very light flow; it may not protect enough for a heavier flow.'};
+ $('recommendation').innerHTML=`<h3>Suggested starting point: ${best}</h3><p>${descriptions[best]}</p><ul>${why.map(x=>'<li>'+escapeHTML(x)+'</li>').join('')}</ul><p class="small"><strong>Remember:</strong> this is a preference-based suggestion, not medical advice. Any of these options—or period underwear—may be right for you. Never choose a higher absorbency than you need or extend wear time to reduce waste.</p><button id="useRecommendation" class="secondary">Use ${best} in timer</button>`;
+ $('useRecommendation').addEventListener('click',()=>{$('productType').value=best;});
+}
+function exportCSV(){
+ const rows=[['Date','Flow','Feeling','Product','Product flow','Time','Log type','Note']];
+ Object.entries(data.days).forEach(([date,r])=>rows.push([date,r.flow||'',r.feeling||'','','','','','']));
+ data.changes.forEach(e=>rows.push([e.date,'','',e.type,e.flow,new Date(e.time).toLocaleString(),e.kind,e.note]));
+ const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='period-product-calendar.csv';a.click();URL.revokeObjectURL(url);
+}
+$('prevMonth').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1);renderCalendar();});
+$('nextMonth').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1);renderCalendar();});
+$('todayBtn').addEventListener('click',()=>selectDay(todayISO()));
+$('saveDay').addEventListener('click',saveDay);$('clearDay').addEventListener('click',clearDay);
+$('recommendBtn').addEventListener('click',recommend);
+$('startTimer').addEventListener('click',()=>logProduct(false));$('refreshProduct').addEventListener('click',()=>logProduct(true));
+$('exportBtn').addEventListener('click',exportCSV);
+$('resetBtn').addEventListener('click',()=>{if(confirm('Delete all period calendar and product log data saved in this browser?')){data={days:{},changes:[],settings:{cycleLength:28,periodLength:5,lastStart:todayISO(),lastEnd:''}};activeChangeId=null;persist();selectDay(todayISO());renderHistory();renderTimer();}});
+$('changeTime').value=localDateTime();
+selectDay(selected);renderHistory();renderTimer();timerInterval=setInterval(renderTimer,30000);
+})();
+</script>
+</body>
+</html>
